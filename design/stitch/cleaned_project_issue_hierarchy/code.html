@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Issue List Tree View</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#136dec",
+                        "primary-content": "#ffffff",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101822",
+                        "surface-light": "#ffffff",
+                        "surface-dark": "#1a2432",
+                        "border-light": "#e2e4e9",
+                        "border-dark": "#2d3748",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "md": "0.375rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                    boxShadow: {
+                        'sm-soft': '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+                        'md-soft': '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+                    }
+                },
+            },
+        }
+    </script>
+<style>/* Custom scrollbar for a cleaner look */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        .dark ::-webkit-scrollbar-thumb {
+            background: #475569;
+        }
+        .dark ::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+
+        /* Hover row utility */
+        .group:hover .row-action-btn {
+            opacity: 1;
+        }</style>
+</head>
+<body class="font-display bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 antialiased h-screen flex overflow-hidden selection:bg-primary/20 selection:text-primary">
+<!-- Sidebar -->
+<aside class="w-64 flex-shrink-0 bg-[#f9fafb] dark:bg-[#0d1218] border-r border-border-light dark:border-border-dark flex flex-col h-full z-20">
+<!-- Workspace / Team Selector -->
+<div class="h-14 flex items-center px-4 border-b border-border-light dark:border-border-dark">
+<button class="flex items-center gap-2 w-full hover:bg-black/5 dark:hover:bg-white/5 p-1.5 rounded-lg transition-colors group">
+<div class="w-6 h-6 rounded bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center text-white font-bold text-xs shadow-sm">
+                    A
+                </div>
+<span class="font-medium text-sm text-slate-700 dark:text-slate-200 truncate flex-1 text-left">Engineering Workspace</span>
+<span class="material-icons-round text-slate-400 text-lg group-hover:text-slate-600 dark:group-hover:text-slate-300">expand_more</span>
+</button>
+</div>
+<!-- Navigation -->
+<div class="flex-1 overflow-y-auto py-4 px-3 space-y-6">
+<!-- Main Section -->
+<div class="space-y-0.5">
+<a class="flex items-center gap-3 px-3 py-1.5 text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-black/5 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white rounded-lg transition-colors group" href="#">
+<span class="material-icons-round text-[20px] text-slate-400 group-hover:text-primary dark:group-hover:text-primary transition-colors">inbox</span>
+                    Inbox
+                    <span class="ml-auto bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 text-[10px] font-bold px-1.5 py-0.5 rounded-md">4</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-1.5 text-sm font-medium text-primary bg-primary/10 rounded-lg transition-colors" href="#">
+<span class="material-icons-round text-[20px]">layers</span>
+                    My Issues
+                </a>
+<a class="flex items-center gap-3 px-3 py-1.5 text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-black/5 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white rounded-lg transition-colors group" href="#">
+<span class="material-icons-round text-[20px] text-slate-400 group-hover:text-primary dark:group-hover:text-primary transition-colors">filter_list</span>
+                    Views
+                </a>
+</div>
+<!-- Your Teams -->
+<div>
+<div class="px-3 mb-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">Your Teams</div>
+<div class="space-y-0.5">
+<a class="flex items-center gap-3 px-3 py-1.5 text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-black/5 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white rounded-lg transition-colors" href="#">
+<span class="w-2 h-2 rounded-full bg-purple-500"></span>
+                        Design System
+                    </a>
+<a class="flex items-center gap-3 px-3 py-1.5 text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-black/5 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white rounded-lg transition-colors" href="#">
+<span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                        Core Product
+                    </a>
+<a class="flex items-center gap-3 px-3 py-1.5 text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-black/5 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white rounded-lg transition-colors" href="#">
+<span class="w-2 h-2 rounded-full bg-orange-500"></span>
+                        Marketing Site
+                    </a>
+</div>
+</div>
+<!-- Projects -->
+<div>
+<div class="px-3 mb-2 flex items-center justify-between group cursor-pointer">
+<span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Projects</span>
+<span class="material-icons-round text-slate-400 text-sm opacity-0 group-hover:opacity-100">add</span>
+</div>
+<div class="space-y-0.5">
+<a class="flex items-center gap-3 px-3 py-1.5 text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-black/5 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white rounded-lg transition-colors" href="#">
+<span class="material-icons-round text-[18px] text-slate-400">folder_open</span>
+                        Q3 Roadmap
+                    </a>
+</div>
+</div>
+</div>
+<!-- Bottom Actions -->
+<div class="p-4 border-t border-border-light dark:border-border-dark space-y-1">
+<a class="flex items-center gap-3 px-3 py-1.5 text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-black/5 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white rounded-lg transition-colors" href="#">
+<span class="material-icons-round text-[20px] text-slate-400">person_add</span>
+                Invite people
+            </a>
+<a class="flex items-center gap-3 px-3 py-1.5 text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-black/5 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white rounded-lg transition-colors" href="#">
+<span class="material-icons-round text-[20px] text-slate-400">settings</span>
+                Settings
+            </a>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 flex flex-col min-w-0 bg-surface-light dark:bg-background-dark relative">
+<!-- Top Navigation Bar -->
+<header class="h-14 border-b border-border-light dark:border-border-dark bg-surface-light dark:bg-background-dark flex items-center justify-between px-6 z-10 sticky top-0">
+<!-- Left: Breadcrumb / Filter trigger -->
+<div class="flex items-center gap-4">
+<div class="flex items-center text-sm font-medium text-slate-500"><span class="hover:text-slate-800 dark:hover:text-slate-200 cursor-pointer">Engineering Workspace</span>
+<span class="material-icons-round text-slate-300 mx-1 text-base">chevron_right</span>
+<span class="hover:text-slate-800 dark:hover:text-slate-200 cursor-pointer">Core Product</span>
+<span class="material-icons-round text-slate-300 mx-1 text-base">chevron_right</span>
+<span class="text-slate-900 dark:text-white">Issues</span></div>
+</div>
+<!-- Center: Search -->
+<div class="flex-1 max-w-xl px-8">
+<div class="relative group">
+<span class="material-icons-round absolute left-3 top-2 text-slate-400 text-lg group-focus-within:text-primary transition-colors">search</span>
+<input class="w-full bg-slate-50 dark:bg-slate-800/50 border border-transparent focus:border-primary/50 focus:bg-white dark:focus:bg-black focus:ring-4 focus:ring-primary/10 rounded-md py-1.5 pl-10 pr-4 text-sm text-slate-900 dark:text-white placeholder-slate-400 transition-all outline-none" placeholder="Search or filter..." type="text"/>
+<div class="absolute right-3 top-1.5 flex gap-1">
+<kbd class="hidden sm:inline-block px-1.5 py-0.5 text-[10px] font-mono font-medium text-slate-400 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded shadow-sm">⌘ K</kbd>
+</div>
+</div>
+</div>
+<!-- Right: Actions -->
+<div class="flex items-center gap-3">
+<button class="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 p-1.5 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" title="Display Options">
+<span class="material-icons-round text-xl">tune</span>
+</button>
+<div class="h-4 w-px bg-slate-200 dark:bg-slate-700 mx-1"></div>
+<button class="bg-primary hover:bg-blue-600 text-white text-sm font-medium px-3 py-1.5 rounded-md shadow-sm shadow-primary/30 flex items-center gap-2 transition-all active:scale-95">
+<span class="material-icons-round text-base">add</span>
+                    New Issue
+                </button>
+</div>
+</header>
+<!-- Main Workspace Area -->
+<div class="flex-1 overflow-auto bg-surface-light dark:bg-background-dark">
+<div class="min-w-[800px]"> <!-- Ensure horizontal scroll if too narrow -->
+<!-- Table Header -->
+<div class="sticky top-0 z-10 bg-surface-light dark:bg-background-dark border-b border-border-light dark:border-border-dark px-6 py-2 grid grid-cols-[100px_minmax(300px,_1fr)_120px_140px_100px_120px] gap-4 text-xs font-semibold text-slate-500 uppercase tracking-wide select-none">
+<div class="flex items-center gap-1 cursor-pointer hover:text-slate-700 dark:hover:text-slate-300">
+                        Key
+                    </div>
+<div class="flex items-center gap-1 cursor-pointer hover:text-slate-700 dark:hover:text-slate-300">
+                        Title
+                    </div>
+<div class="flex items-center gap-1 cursor-pointer hover:text-slate-700 dark:hover:text-slate-300">
+                        State
+                    </div>
+<div class="flex items-center gap-1 cursor-pointer hover:text-slate-700 dark:hover:text-slate-300">
+                        Project
+                    </div>
+<div class="flex items-center gap-1 cursor-pointer hover:text-slate-700 dark:hover:text-slate-300">
+                        Assignee
+                    </div>
+<div class="flex items-center gap-1 cursor-pointer hover:text-slate-700 dark:hover:text-slate-300 justify-end text-right">
+                        Updated
+                        <span class="material-icons-round text-sm">arrow_downward</span>
+</div>
+</div>
+<!-- Table Body -->
+<div class="pb-20"> <!-- Padding for potential bottom actions -->
+<!-- Row 1: Parent -->
+<div class="group grid grid-cols-[100px_minmax(300px,_1fr)_120px_140px_100px_120px] gap-4 px-6 py-2.5 items-center border-b border-border-light/40 dark:border-border-dark/40 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer text-sm">
+<div class="text-slate-500 font-mono text-xs flex items-center gap-2">
+<input class="rounded border-slate-300 text-primary focus:ring-primary/20 w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity" type="checkbox"/>
+                            APP-123
+                        </div>
+<div class="font-medium text-slate-900 dark:text-slate-100 flex items-center gap-2"><button class="p-0.5 rounded hover:bg-slate-200 dark:hover:bg-slate-700 text-primary transition-colors">
+<span class="material-icons-round text-lg">expand_more</span>
+</button>
+Refactor authentication flow</div>
+<div>
+<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
+<span class="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span>
+                                In Progress
+                            </span>
+</div>
+<div class="flex items-center gap-1.5">
+<div class="w-2 h-2 rounded-full bg-emerald-500"></div>
+<span class="text-slate-600 dark:text-slate-400 text-xs truncate">Core Product</span>
+</div>
+<div class="flex -space-x-2 overflow-hidden">
+<img alt="Female avatar portrait" class="inline-block h-6 w-6 rounded-full ring-2 ring-white dark:ring-slate-900 object-cover" data-alt="Female avatar portrait" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAJLtZ0hcffLTwjfbwvFwYBzpu3w5pJRbcN06T18z-lDnyFWDRNCpRkj-huBaKkqwhehxT_L5xEZ-LDihXjqQeY2l7Mvbg7oTeYGLRlbjBHhEaLwvPB63lG4OqIJofvn0Z854ntnmEZ6X8aXZh1d6g-r7D8rhd_z17iO7fjGm5W4TZc6IiXh1Nbqwslu5xAlVvhq-2NtXMz6-R8yfXbN-dJOf-Ij7DiZDjpcZSrSERpjrU5vzQNFktHvNnDCP-Iptlcnjv-4zuwx5AT"/>
+</div>
+<div class="text-right text-slate-400 text-xs">2h ago</div>
+</div>
+<!-- Row 2: Child (Nested) -->
+<div class="group grid grid-cols-[100px_minmax(300px,_1fr)_120px_140px_100px_120px] gap-4 px-6 py-2 items-center border-b border-border-light/40 dark:border-border-dark/40 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer text-sm bg-slate-50/30 dark:bg-white/5" style="padding-left: 2.5rem;">
+<div class="text-slate-500 font-mono text-xs flex items-center gap-2">
+                            APP-124
+                        </div>
+<div class="font-normal text-slate-700 dark:text-slate-300 flex items-center gap-2 pl-6">Update login modal UI</div>
+<div>
+<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
+<span class="w-1.5 h-1.5 rounded-full border border-slate-500"></span>
+                                Todo
+                            </span>
+</div>
+<div class="flex items-center gap-1.5 opacity-50">
+<!-- Inherited project usually not shown or dimmed -->
+</div>
+<div class="flex -space-x-2 overflow-hidden">
+<img alt="Male avatar portrait" class="inline-block h-6 w-6 rounded-full ring-2 ring-white dark:ring-slate-900 object-cover" data-alt="Male avatar portrait" src="https://lh3.googleusercontent.com/aida-public/AB6AXuACeLH6PfMph5hOdh5YGlZIls8o6VpEC9Ee20K29peKVB1-Tyn93VQgTsYCaFL5w3Y7EaxGhDVEdZMLqDG_tQJMKCP5tL9J3Y2Oxb8ZSH72Aps7bInPC8zqm3nBtrLHj2rYENUO93hE68_J0R0Vqd3NSQEv4j7JRv-sbBOYd_zyeZ6I_5nR9v7dq-YugBqyF6hupLr0zB8YZUkhwLyNwcuzEXuAzqXIXQqsjtDSdCLjjxBt7GIYQV5lU9arIV8YcFDBV3RGADS1odcg"/>
+</div>
+<div class="text-right text-slate-400 text-xs">4h ago</div>
+</div>
+<!-- Row 3: Child (Nested) -->
+<div class="group grid grid-cols-[100px_minmax(300px,_1fr)_120px_140px_100px_120px] gap-4 px-6 py-2 items-center border-b border-border-light/40 dark:border-border-dark/40 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer text-sm bg-slate-50/30 dark:bg-white/5" style="padding-left: 2.5rem;">
+<div class="text-slate-500 font-mono text-xs flex items-center gap-2">
+                            APP-125
+                        </div>
+<div class="font-normal text-slate-700 dark:text-slate-300 flex items-center gap-2 pl-6 line-through opacity-70">Fix session timeout bug</div>
+<div>
+<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+<span class="material-icons-round text-[10px]">check</span>
+                                Done
+                            </span>
+</div>
+<div class="flex items-center gap-1.5 opacity-50">
+</div>
+<div class="flex -space-x-2 overflow-hidden">
+<img alt="Woman avatar portrait" class="inline-block h-6 w-6 rounded-full ring-2 ring-white dark:ring-slate-900 object-cover" data-alt="Woman avatar portrait" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCoDFnTgIpTqs7Qotk2c_ymP9dNJtcdf7SbDHV0N9lHWG6pJdjI6cbm7QO3sJ6WTxe4tZjT1Me-V1tIQfwll8kkvipaIoRt-SonkTcRUTkTIPUjIpVxM4Chj10O4HLka3uXMOc0Kjj3gmLVah2eX8XZ-LqirAMxgYIw_X9mYWaHgD5ugwI_3oyDGkFmrbI7iklSv7ojnJ6tRBhyN34PLAP8TJz71ffzgxAUmkTKUCeZzBSPcq8LSPJjhWDHDIl0JzMsENI5diKQYDyc"/>
+</div>
+<div class="text-right text-slate-400 text-xs">1d ago</div>
+</div>
+<!-- Row 4: Parent -->
+<div class="group grid grid-cols-[100px_minmax(300px,_1fr)_120px_140px_100px_120px] gap-4 px-6 py-2.5 items-center border-b border-border-light/40 dark:border-border-dark/40 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer text-sm">
+<div class="text-slate-500 font-mono text-xs flex items-center gap-2">
+<input class="rounded border-slate-300 text-primary focus:ring-primary/20 w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity" type="checkbox"/>
+                            APP-130
+                        </div>
+<div class="font-medium text-slate-900 dark:text-slate-100 flex items-center gap-2">
+<button class="p-0.5 rounded hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-400 hover:text-slate-600 transition-colors">
+<span class="material-icons-round text-lg">chevron_right</span>
+</button>
+                            Q3 Marketing Landing Page
+                        </div>
+<div>
+<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium text-slate-500 border border-dashed border-slate-300 dark:border-slate-600">
+<span class="w-1.5 h-1.5 rounded-full border border-slate-400"></span>
+                                Backlog
+                            </span>
+</div>
+<div class="flex items-center gap-1.5">
+<div class="w-2 h-2 rounded-full bg-orange-500"></div>
+<span class="text-slate-600 dark:text-slate-400 text-xs truncate">Marketing Site</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="w-6 h-6 rounded-full border border-dashed border-slate-300 dark:border-slate-600 flex items-center justify-center text-slate-400 hover:text-slate-600 hover:border-slate-400 transition-colors">
+<span class="material-icons-round text-[14px]">person</span>
+</span>
+</div>
+<div class="text-right text-slate-400 text-xs">Oct 24</div>
+</div>
+<!-- Row 5: Parent -->
+<div class="group grid grid-cols-[100px_minmax(300px,_1fr)_120px_140px_100px_120px] gap-4 px-6 py-2.5 items-center border-b border-border-light/40 dark:border-border-dark/40 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer text-sm">
+<div class="text-slate-500 font-mono text-xs flex items-center gap-2">
+<input class="rounded border-slate-300 text-primary focus:ring-primary/20 w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity" type="checkbox"/>
+                            APP-135
+                        </div>
+<div class="font-medium text-slate-900 dark:text-slate-100 flex items-center gap-2">
+<!-- Leaf node spacing for alignment -->
+<span class="w-5 h-5 inline-block"></span>
+                            Implement dark mode across settings
+                        </div>
+<div>
+<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
+<span class="material-icons-round text-[10px]">priority_high</span>
+                                High
+                            </span>
+</div>
+<div class="flex items-center gap-1.5">
+<div class="w-2 h-2 rounded-full bg-purple-500"></div>
+<span class="text-slate-600 dark:text-slate-400 text-xs truncate">Design System</span>
+</div>
+<div class="flex -space-x-2 overflow-hidden">
+<img alt="Male avatar portrait" class="inline-block h-6 w-6 rounded-full ring-2 ring-white dark:ring-slate-900 object-cover" data-alt="Male avatar portrait" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDFdYLsQRX-0leseiTcoyu-JW40f_DkdsfktRq1wGFSRoIFkpqII9hqtV35OAGEEd-Nj3QwTGOKal8iRNqz0jUJKm7IJDJEXHKIJSlRoEi6XDRrTyJHlTKMhY_Avy4geXI5oarpNz_cwKbTwghfEWFDg42IH9CU2qCn6cDh2lh_p_8NCt4uYNADeNk5Vi6-3C2q7ttjoJagY0dIuf6SfFPOQ1hb3eqsp9EcP0XEHQnhynGe8g6kiqph2waY88fmGdIeSuWl4dmAwucY"/>
+</div>
+<div class="text-right text-slate-400 text-xs">Yesterday</div>
+</div>
+<!-- Row 6: Parent (Selected State Example) -->
+<div class="group grid grid-cols-[100px_minmax(300px,_1fr)_120px_140px_100px_120px] gap-4 px-6 py-2.5 items-center border-b border-border-light/40 dark:border-border-dark/40 bg-primary/5 dark:bg-primary/10 hover:bg-primary/10 transition-colors cursor-pointer text-sm">
+<div class="text-primary font-mono text-xs flex items-center gap-2 font-medium">
+<input checked="" class="rounded border-primary text-primary focus:ring-primary/20 w-3.5 h-3.5 opacity-100 transition-opacity" type="checkbox"/>
+                            APP-140
+                        </div>
+<div class="font-medium text-slate-900 dark:text-slate-100 flex items-center gap-2">
+<span class="w-5 h-5 inline-block"></span>
+                            Database migration script v2
+                        </div>
+<div>
+<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
+<span class="w-1.5 h-1.5 rounded-full border border-slate-500"></span>
+                                Todo
+                            </span>
+</div>
+<div class="flex items-center gap-1.5">
+<div class="w-2 h-2 rounded-full bg-emerald-500"></div>
+<span class="text-slate-600 dark:text-slate-400 text-xs truncate">Core Product</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="w-6 h-6 rounded-full border border-dashed border-slate-300 dark:border-slate-600 flex items-center justify-center text-slate-400 hover:text-slate-600 hover:border-slate-400 transition-colors">
+<span class="material-icons-round text-[14px]">person</span>
+</span>
+</div>
+<div class="text-right text-slate-400 text-xs">Oct 20</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Floating Action Bar (Contextual) -->
+<div class="absolute bottom-6 left-1/2 transform -translate-x-1/2 bg-surface-light dark:bg-slate-800 border border-border-light dark:border-border-dark shadow-md-soft rounded-full px-4 py-2 flex items-center gap-4 z-30 animate-fade-in-up">
+<div class="flex items-center gap-2 border-r border-border-light dark:border-border-dark pr-4">
+<span class="bg-primary text-white text-xs font-bold px-2 py-0.5 rounded-full">1</span>
+<span class="text-sm font-medium text-slate-700 dark:text-slate-200">Selected</span>
+</div>
+<div class="flex items-center gap-1">
+<button class="p-2 text-slate-500 hover:text-slate-800 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 rounded-full transition-colors tooltip" title="Change Status">
+<span class="material-icons-round text-lg">donut_large</span>
+</button>
+<button class="p-2 text-slate-500 hover:text-slate-800 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 rounded-full transition-colors" title="Assign">
+<span class="material-icons-round text-lg">person_add</span>
+</button>
+<button class="p-2 text-slate-500 hover:text-slate-800 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 rounded-full transition-colors" title="Move to Project">
+<span class="material-icons-round text-lg">folder</span>
+</button>
+<div class="w-px h-4 bg-slate-200 dark:bg-slate-600 mx-1"></div>
+<button class="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full transition-colors" title="Delete">
+<span class="material-icons-round text-lg">delete</span>
+</button>
+</div>
+</div>
+</main>
+</body></html>

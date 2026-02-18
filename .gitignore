@@ -1,0 +1,36 @@
+# Node / frontend
+node_modules/
+**/node_modules/
+dist/
+apps/web/dist/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# .NET / backend
+**/bin/
+**/obj/
+
+# Local env/config
+.env
+.env.*
+!.env.example
+
+# Local runtime artifacts
+web-dev.log
+.web-dev.pid
+*.log
+
+# Tooling / editor
+.vscode/
+.idea/
+*.user
+*.suo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Local agent state
+.sisyphus/

@@ -1,0 +1,63 @@
+@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --app-bg: 220 14% 97%;
+  --sidebar-bg: 220 18% 96%;
+  --text-main: 224 27% 12%;
+  --surface-0: 0 0% 100%;
+  --surface-1: 220 20% 98%;
+  --surface-2: 220 22% 96%;
+  --border-subtle: 220 16% 86%;
+  --border-strong: 220 12% 72%;
+  --ink-muted: 220 10% 42%;
+  --ink-soft: 220 9% 55%;
+  --surface-glow: none;
+  color-scheme: light;
+}
+
+:root.dark {
+  --app-bg: 222 22% 9%;
+  --sidebar-bg: 222 18% 11%;
+  --text-main: 220 18% 92%;
+  --surface-0: 223 24% 11%;
+  --surface-1: 223 22% 14%;
+  --surface-2: 223 20% 17%;
+  --border-subtle: 222 18% 28%;
+  --border-strong: 222 16% 40%;
+  --ink-muted: 220 14% 70%;
+  --ink-soft: 220 12% 60%;
+  --surface-glow: radial-gradient(circle at 10% 0%, rgba(59, 130, 246, 0.1), transparent 40%);
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  font-family: "Manrope", "Segoe UI", sans-serif;
+  color: hsl(var(--text-main));
+  background: var(--surface-glow), hsl(var(--app-bg));
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: "Manrope", "Segoe UI", sans-serif;
+  letter-spacing: -0.01em;
+}

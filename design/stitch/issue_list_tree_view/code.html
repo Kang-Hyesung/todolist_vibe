@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Issue List Tree View</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#5e6ad2","primary-content": "#ffffff",
+                        "background-light": "#f6f8fa",
+                        "background-dark": "#0e1116","surface-light": "#ffffff",
+                        "surface-dark": "#161b22","border-light": "#d0d7de",
+                        "border-dark": "#30363d",
+                        "muted-dark": "#8b949e",
+                        "tree-line": "#30363d",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"],
+                        "mono": ["ui-monospace", "SFMono-Regular", "SF Mono", "Menlo", "Consolas", "Liberation Mono", "monospace"],
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "md": "0.375rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                    boxShadow: {
+                        'sm-soft': '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+                        'md-soft': '0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.1)',
+                    }
+                },
+            },
+        }
+    </script>
+<style>::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #30363d;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #8b949e;
+        }.tree-container {
+            position: relative;
+        }.tree-branch-vertical {
+            position: absolute;
+            left: 28px;top: -24px;bottom: 22px;width: 1px;
+            background-color: #30363d; 
+        }.tree-branch-connector {
+            position: absolute;
+            left: 28px;
+            top: 50%;
+            width: 16px;height: 16px;
+            border-bottom-left-radius: 8px;
+            border-left: 1px solid #30363d;
+            border-bottom: 1px solid #30363d;
+            transform: translateY(-100%);}.key-connector {
+            display: inline-flex;
+            align-items: center;
+            color: #484f58;
+            font-family: monospace;
+            margin-right: 6px;
+        }.group:hover .row-action-btn {
+            opacity: 1;
+        }body {
+            background-color: #0d1117;
+            color: #c9d1d9;
+        }
+    </style>
+</head>
+<body class="font-display bg-background-dark text-slate-100 antialiased h-screen flex overflow-hidden selection:bg-primary/30 selection:text-white">
+<aside class="w-64 flex-shrink-0 bg-[#0d1117] border-r border-border-dark flex flex-col h-full z-20">
+<div class="h-14 flex items-center px-4 border-b border-border-dark">
+<button class="flex items-center gap-2 w-full hover:bg-white/5 p-1.5 rounded-lg transition-colors group">
+<div class="w-5 h-5 rounded bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-[10px] shadow-sm">
+                    A
+                </div>
+<span class="font-medium text-sm text-slate-200 truncate flex-1 text-left">Acme Corp.</span>
+<span class="material-icons-round text-slate-400 text-lg group-hover:text-slate-300">expand_more</span>
+</button>
+</div>
+<div class="flex-1 overflow-y-auto py-4 px-3 space-y-6">
+<div class="space-y-0.5">
+<a class="flex items-center gap-3 px-3 py-1.5 text-sm font-medium text-slate-400 hover:bg-white/5 hover:text-white rounded-lg transition-colors group" href="#">
+<span class="material-icons-round text-[18px] text-slate-500 group-hover:text-slate-300 transition-colors">inbox</span>
+                    Inbox
+                    <span class="ml-auto bg-slate-800 text-slate-400 text-[10px] font-bold px-1.5 py-0.5 rounded-md border border-slate-700">4</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-1.5 text-sm font-medium text-slate-100 bg-white/5 rounded-lg transition-colors" href="#">
+<span class="material-icons-round text-[18px] text-primary">layers</span>
+                    My Issues
+                </a>
+<a class="flex items-center gap-3 px-3 py-1.5 text-sm font-medium text-slate-400 hover:bg-white/5 hover:text-white rounded-lg transition-colors group" href="#">
+<span class="material-icons-round text-[18px] text-slate-500 group-hover:text-slate-300 transition-colors">filter_list</span>
+                    Views
+                </a>
+</div>
+<div>
+<div class="px-3 mb-2 text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Your Teams</div>
+<div class="space-y-0.5">
+<a class="flex items-center gap-3 px-3 py-1.5 text-sm font-medium text-slate-400 hover:bg-white/5 hover:text-white rounded-lg transition-colors" href="#">
+<span class="w-2 h-2 rounded-[2px] bg-purple-500/80"></span>
+                        Design System
+                    </a>
+<a class="flex items-center gap-3 px-3 py-1.5 text-sm font-medium text-slate-400 hover:bg-white/5 hover:text-white rounded-lg transition-colors" href="#">
+<span class="w-2 h-2 rounded-[2px] bg-emerald-500/80"></span>
+                        Core Product
+                    </a>
+<a class="flex items-center gap-3 px-3 py-1.5 text-sm font-medium text-slate-400 hover:bg-white/5 hover:text-white rounded-lg transition-colors" href="#">
+<span class="w-2 h-2 rounded-[2px] bg-orange-500/80"></span>
+                        Marketing Site
+                    </a>
+</div>
+</div>
+<div>
+<div class="px-3 mb-2 flex items-center justify-between group cursor-pointer">
+<span class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Projects</span>
+<span class="material-icons-round text-slate-500 text-sm opacity-0 group-hover:opacity-100 hover:text-white">add</span>
+</div>
+<div class="space-y-0.5">
+<a class="flex items-center gap-3 px-3 py-1.5 text-sm font-medium text-slate-400 hover:bg-white/5 hover:text-white rounded-lg transition-colors" href="#">
+<span class="material-icons-round text-[18px] text-slate-500">folder</span>
+                        Q3 Roadmap
+                    </a>
+</div>
+</div>
+</div>
+<div class="p-4 border-t border-border-dark space-y-1">
+<a class="flex items-center gap-3 px-3 py-1.5 text-sm font-medium text-slate-400 hover:bg-white/5 hover:text-white rounded-lg transition-colors" href="#">
+<span class="material-icons-round text-[18px] text-slate-500">person_add</span>
+                Invite people
+            </a>
+<a class="flex items-center gap-3 px-3 py-1.5 text-sm font-medium text-slate-400 hover:bg-white/5 hover:text-white rounded-lg transition-colors" href="#">
+<span class="material-icons-round text-[18px] text-slate-500">settings</span>
+                Settings
+            </a>
+</div>
+</aside>
+<main class="flex-1 flex flex-col min-w-0 bg-[#0d1117] relative">
+<header class="h-14 border-b border-border-dark bg-[#0d1117] flex items-center justify-between px-6 z-10 sticky top-0">
+<div class="flex items-center gap-4">
+<div class="flex items-center text-sm font-medium text-slate-400">
+<span class="hover:text-slate-200 cursor-pointer transition-colors">Acme Corp</span>
+<span class="text-slate-600 mx-2 text-sm">/</span>
+<span class="text-white">Issues</span>
+</div>
+</div>
+<div class="flex-1 max-w-xl px-8">
+<div class="relative group">
+<span class="material-icons-round absolute left-3 top-2 text-slate-500 text-lg group-focus-within:text-slate-300 transition-colors">search</span>
+<input class="w-full bg-[#161b22] border border-border-dark focus:border-slate-500 focus:bg-[#0d1117] focus:ring-1 focus:ring-slate-500 rounded-md py-1.5 pl-10 pr-4 text-sm text-white placeholder-slate-500 transition-all outline-none" placeholder="Search or filter..." type="text"/>
+<div class="absolute right-3 top-1.5 flex gap-1">
+<kbd class="hidden sm:inline-block px-1.5 py-0.5 text-[10px] font-mono font-medium text-slate-500 bg-[#0d1117] border border-border-dark rounded">⌘ K</kbd>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<button class="text-slate-400 hover:text-slate-200 p-1.5 rounded-md hover:bg-white/5 transition-colors" title="Display Options">
+<span class="material-icons-round text-xl">tune</span>
+</button>
+<div class="h-4 w-px bg-border-dark mx-1"></div>
+<button class="bg-[#238636] hover:bg-[#2ea043] text-white text-sm font-medium px-3 py-1.5 rounded-md shadow flex items-center gap-2 transition-all active:scale-95 border border-[rgba(240,246,252,0.1)]">
+<span class="material-icons-round text-base">add</span>
+                    New Issue
+                </button>
+</div>
+</header>
+<div class="flex-1 overflow-auto bg-[#0d1117]">
+<div class="min-w-[900px]"> 
+<div class="sticky top-0 z-10 bg-[#0d1117] border-b border-border-dark px-6 py-2.5 grid grid-cols-[1fr_100px_100px_120px] gap-4 text-[11px] font-semibold text-slate-500 uppercase tracking-wider select-none">
+<div class="flex items-center gap-1 cursor-pointer hover:text-slate-300 pl-2">
+                        Issue
+                    </div>
+<div class="flex items-center gap-1 cursor-pointer hover:text-slate-300">
+                        Project
+                    </div>
+<div class="flex items-center gap-1 cursor-pointer hover:text-slate-300">
+                        Assignee
+                    </div>
+<div class="flex items-center gap-1 cursor-pointer hover:text-slate-300 justify-end text-right">
+                        Updated
+                    </div>
+</div>
+<div class="pb-20">
+<div class="group grid grid-cols-[1fr_100px_100px_120px] gap-4 px-4 py-2 items-center border-b border-border-dark/50 hover:bg-[#161b22] transition-colors cursor-pointer text-sm">
+<div class="flex items-center gap-3">
+<div class="w-6 flex justify-center">
+<button class="p-0.5 rounded hover:bg-white/10 text-slate-400 hover:text-slate-200 transition-colors">
+<span class="material-icons-round text-lg transform rotate-90">arrow_right</span>
+</button>
+</div>
+<div class="flex items-center gap-3 flex-1">
+<span class="font-mono text-xs text-muted-dark whitespace-nowrap">APP-123</span>
+<span class="material-symbols-outlined text-[18px] text-blue-400" title="In Progress">timelapse</span>
+<span class="font-medium text-slate-100">Refactor authentication flow</span>
+</div>
+</div>
+<div class="flex items-center gap-1.5">
+<div class="w-2 h-2 rounded-[2px] bg-emerald-500/80"></div>
+<span class="text-slate-400 text-xs truncate">Core Product</span>
+</div>
+<div class="flex -space-x-2 overflow-hidden">
+<img alt="Female avatar portrait" class="inline-block h-5 w-5 rounded-full ring-2 ring-[#0d1117] grayscale opacity-70 group-hover:grayscale-0 group-hover:opacity-100 transition-all object-cover" data-alt="Female avatar portrait" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAJLtZ0hcffLTwjfbwvFwYBzpu3w5pJRbcN06T18z-lDnyFWDRNCpRkj-huBaKkqwhehxT_L5xEZ-LDihXjqQeY2l7Mvbg7oTeYGLRlbjBHhEaLwvPB63lG4OqIJofvn0Z854ntnmEZ6X8aXZh1d6g-r7D8rhd_z17iO7fjGm5W4TZc6IiXh1Nbqwslu5xAlVvhq-2NtXMz6-R8yfXbN-dJOf-Ij7DiZDjpcZSrSERpjrU5vzQNFktHvNnDCP-Iptlcnjv-4zuwx5AT"/>
+</div>
+<div class="text-right text-slate-500 text-xs">2h ago</div>
+</div>
+<div class="group grid grid-cols-[1fr_100px_100px_120px] gap-4 px-4 py-2 items-center border-b border-border-dark/50 hover:bg-[#161b22] transition-colors cursor-pointer text-sm relative">
+<div class="tree-branch-connector"></div>
+<div class="tree-branch-vertical" style="height: calc(100% + 44px);"></div> 
+<div class="flex items-center gap-3 pl-[44px]"> 
+<div class="flex items-center gap-3 flex-1">
+<span class="key-connector">---</span>
+<span class="font-mono text-xs text-muted-dark whitespace-nowrap">APP-124</span>
+<span class="material-symbols-outlined text-[18px] text-slate-500" title="Todo">radio_button_unchecked</span>
+<span class="font-normal text-slate-300">Update login modal UI</span>
+</div>
+</div>
+<div class="flex items-center gap-1.5 opacity-50">
+</div>
+<div class="flex -space-x-2 overflow-hidden">
+<img alt="Male avatar portrait" class="inline-block h-5 w-5 rounded-full ring-2 ring-[#0d1117] grayscale opacity-70 group-hover:grayscale-0 group-hover:opacity-100 transition-all object-cover" data-alt="Male avatar portrait" src="https://lh3.googleusercontent.com/aida-public/AB6AXuACeLH6PfMph5hOdh5YGlZIls8o6VpEC9Ee20K29peKVB1-Tyn93VQgTsYCaFL5w3Y7EaxGhDVEdZMLqDG_tQJMKCP5tL9J3Y2Oxb8ZSH72Aps7bInPC8zqm3nBtrLHj2rYENUO93hE68_J0R0Vqd3NSQEv4j7JRv-sbBOYd_zyeZ6I_5nR9v7dq-YugBqyF6hupLr0zB8YZUkhwLyNwcuzEXuAzqXIXQqsjtDSdCLjjxBt7GIYQV5lU9arIV8YcFDBV3RGADS1odcg"/>
+</div>
+<div class="text-right text-slate-500 text-xs">4h ago</div>
+</div>
+<div class="group grid grid-cols-[1fr_100px_100px_120px] gap-4 px-4 py-2 items-center border-b border-border-dark/50 hover:bg-[#161b22] transition-colors cursor-pointer text-sm relative">
+<div class="tree-branch-connector"></div>
+<div class="tree-branch-vertical" style="top: -46px; height: 70px;"></div>
+<div class="flex items-center gap-3 pl-[44px]"> 
+<div class="flex items-center gap-3 flex-1">
+<span class="key-connector">---</span>
+<span class="font-mono text-xs text-muted-dark whitespace-nowrap">APP-125</span>
+<span class="material-symbols-outlined text-[18px] text-purple-400 fill-current" title="Done">check_circle</span>
+<span class="font-normal text-slate-400 line-through decoration-slate-600">Fix session timeout bug</span>
+</div>
+</div>
+<div class="flex items-center gap-1.5 opacity-50">
+</div>
+<div class="flex -space-x-2 overflow-hidden">
+<img alt="Woman avatar portrait" class="inline-block h-5 w-5 rounded-full ring-2 ring-[#0d1117] grayscale opacity-70 group-hover:grayscale-0 group-hover:opacity-100 transition-all object-cover" data-alt="Woman avatar portrait" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCoDFnTgIpTqs7Qotk2c_ymP9dNJtcdf7SbDHV0N9lHWG6pJdjI6cbm7QO3sJ6WTxe4tZjT1Me-V1tIQfwll8kkvipaIoRt-SonkTcRUTkTIPUjIpVxM4Chj10O4HLka3uXMOc0Kjj3gmLVah2eX8XZ-LqirAMxgYIw_X9mYWaHgD5ugwI_3oyDGkFmrbI7iklSv7ojnJ6tRBhyN34PLAP8TJz71ffzgxAUmkTKUCeZzBSPcq8LSPJjhWDHDIl0JzMsENI5diKQYDyc"/>
+</div>
+<div class="text-right text-slate-500 text-xs">1d ago</div>
+</div>
+<div class="group grid grid-cols-[1fr_100px_100px_120px] gap-4 px-4 py-2 items-center border-b border-border-dark/50 hover:bg-[#161b22] transition-colors cursor-pointer text-sm mt-2">
+<div class="flex items-center gap-3">
+<div class="w-6 flex justify-center">
+<span class="w-1.5 h-1.5 rounded-full bg-border-dark"></span>
+</div>
+<div class="flex items-center gap-3 flex-1">
+<span class="font-mono text-xs text-muted-dark whitespace-nowrap">APP-130</span>
+<span class="material-symbols-outlined text-[18px] text-slate-500 border-slate-600 border-dashed rounded-full" style="font-size:16px; border-width: 1px; padding: 0px;" title="Backlog">radio_button_unchecked</span>
+<span class="font-medium text-slate-100">Q3 Marketing Landing Page</span>
+</div>
+</div>
+<div class="flex items-center gap-1.5">
+<div class="w-2 h-2 rounded-[2px] bg-orange-500/80"></div>
+<span class="text-slate-400 text-xs truncate">Marketing Site</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="w-5 h-5 rounded-full border border-dashed border-slate-600 flex items-center justify-center text-slate-500 text-[10px]">
+                        ?
+                    </span>
+</div>
+<div class="text-right text-slate-500 text-xs">Oct 24</div>
+</div>
+<div class="group grid grid-cols-[1fr_100px_100px_120px] gap-4 px-4 py-2 items-center border-b border-border-dark/50 hover:bg-[#161b22] transition-colors cursor-pointer text-sm">
+<div class="flex items-center gap-3">
+<div class="w-6 flex justify-center">
+<span class="w-1.5 h-1.5 rounded-full bg-border-dark"></span>
+</div>
+<div class="flex items-center gap-3 flex-1">
+<span class="font-mono text-xs text-muted-dark whitespace-nowrap">APP-135</span>
+<span class="material-symbols-outlined text-[18px] text-amber-500" title="High Priority">priority_high</span>
+<span class="font-medium text-slate-100">Implement dark mode across settings</span>
+</div>
+</div>
+<div class="flex items-center gap-1.5">
+<div class="w-2 h-2 rounded-[2px] bg-purple-500/80"></div>
+<span class="text-slate-400 text-xs truncate">Design System</span>
+</div>
+<div class="flex -space-x-2 overflow-hidden">
+<img alt="Male avatar portrait" class="inline-block h-5 w-5 rounded-full ring-2 ring-[#0d1117] grayscale opacity-70 group-hover:grayscale-0 group-hover:opacity-100 transition-all object-cover" data-alt="Male avatar portrait" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDFdYLsQRX-0leseiTcoyu-JW40f_DkdsfktRq1wGFSRoIFkpqII9hqtV35OAGEEd-Nj3QwTGOKal8iRNqz0jUJKm7IJDJEXHKIJSlRoEi6XDRrTyJHlTKMhY_Avy4geXI5oarpNz_cwKbTwghfEWFDg42IH9CU2qCn6cDh2lh_p_8NCt4uYNADeNk5Vi6-3C2q7ttjoJagY0dIuf6SfFPOQ1hb3eqsp9EcP0XEHQnhynGe8g6kiqph2waY88fmGdIeSuWl4dmAwucY"/>
+</div>
+<div class="text-right text-slate-500 text-xs">Yesterday</div>
+</div>
+<div class="group grid grid-cols-[1fr_100px_100px_120px] gap-4 px-4 py-2 items-center border-b border-border-dark/50 bg-[#1f242c] hover:bg-[#262c36] transition-colors cursor-pointer text-sm border-l-2 border-l-primary">
+<div class="flex items-center gap-3 -ml-[2px]"> 
+<div class="w-6 flex justify-center">
+<span class="w-1.5 h-1.5 rounded-full bg-primary shadow shadow-primary/50"></span>
+</div>
+<div class="flex items-center gap-3 flex-1">
+<span class="font-mono text-xs text-slate-400 whitespace-nowrap">APP-140</span>
+<span class="material-symbols-outlined text-[18px] text-slate-500" title="Todo">radio_button_unchecked</span>
+<span class="font-medium text-white">Database migration script v2</span>
+</div>
+</div>
+<div class="flex items-center gap-1.5">
+<div class="w-2 h-2 rounded-[2px] bg-emerald-500/80"></div>
+<span class="text-slate-400 text-xs truncate">Core Product</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="w-5 h-5 rounded-full border border-dashed border-slate-600 flex items-center justify-center text-slate-500 text-[10px]">
+                        ?
+                    </span>
+</div>
+<div class="text-right text-slate-500 text-xs">Oct 20</div>
+</div>
+</div>
+</div>
+</div>
+<div class="absolute bottom-6 left-1/2 transform -translate-x-1/2 bg-[#161b22] border border-border-dark shadow-md-soft rounded-lg px-3 py-1.5 flex items-center gap-3 z-30">
+<div class="flex items-center gap-2 border-r border-border-dark pr-3 mr-1">
+<div class="bg-primary text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded">1</div>
+<span class="text-xs font-medium text-slate-300">Selected</span>
+</div>
+<div class="flex items-center gap-1">
+<button class="p-1.5 text-slate-400 hover:text-white hover:bg-white/10 rounded-md transition-colors tooltip" title="Change Status">
+<span class="material-icons-round text-lg">donut_large</span>
+</button>
+<button class="p-1.5 text-slate-400 hover:text-white hover:bg-white/10 rounded-md transition-colors" title="Assign">
+<span class="material-icons-round text-lg">person_add</span>
+</button>
+<button class="p-1.5 text-slate-400 hover:text-white hover:bg-white/10 rounded-md transition-colors" title="Move to Project">
+<span class="material-icons-round text-lg">folder</span>
+</button>
+<div class="w-px h-3 bg-border-dark mx-1"></div>
+<button class="p-1.5 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-md transition-colors" title="Delete">
+<span class="material-icons-round text-lg">delete</span>
+</button>
+</div>
+</div>
+</main>
+
+</body></html>

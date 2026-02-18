@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Inbox Notification View</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#136dec",
+                        "primary-hover": "#105bca",
+                        "primary-light": "#eef4fe",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101822",
+                        "border-subtle": "#e5e7eb",
+                        "text-primary": "#111827",
+                        "text-secondary": "#6b7280",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                    boxShadow: {
+                        'soft': '0 2px 8px rgba(0, 0, 0, 0.04)',
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        /* Custom scrollbar for webkit */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #d1d5db;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #9ca3af;
+        }
+        .sidebar-item-active {
+            background-color: rgba(19, 109, 236, 0.08);
+            color: #136dec;
+        }
+        .notification-row:hover .row-actions {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-text-primary h-screen flex overflow-hidden selection:bg-primary/20 selection:text-primary">
+<!-- Sidebar -->
+<aside class="w-64 bg-gray-50 dark:bg-gray-900 border-r border-border-subtle flex flex-col h-full flex-shrink-0">
+<!-- Workspace Switcher -->
+<div class="h-14 flex items-center px-4 border-b border-border-subtle hover:bg-gray-100 cursor-pointer transition-colors">
+<div class="w-6 h-6 rounded bg-primary text-white flex items-center justify-center text-xs font-bold mr-3">
+                A
+            </div>
+<span class="font-medium text-sm flex-1 truncate">Acme Inc.</span>
+<span class="material-icons-round text-text-secondary text-lg">expand_more</span>
+</div>
+<!-- Main Navigation -->
+<div class="px-2 py-4 space-y-0.5 flex-1 overflow-y-auto">
+<div class="mb-6">
+<a class="sidebar-item-active flex items-center px-2 py-1.5 rounded text-sm font-medium transition-colors" href="#">
+<span class="material-icons-round text-lg mr-3">inbox</span>
+                    Inbox
+                    <span class="ml-auto text-xs font-medium bg-primary/10 text-primary px-1.5 py-0.5 rounded-full">4</span>
+</a>
+<a class="text-text-secondary hover:bg-gray-100 hover:text-text-primary flex items-center px-2 py-1.5 rounded text-sm font-medium transition-colors" href="#">
+<span class="material-icons-round text-lg mr-3">adjust</span>
+                    My Issues
+                </a>
+<a class="text-text-secondary hover:bg-gray-100 hover:text-text-primary flex items-center px-2 py-1.5 rounded text-sm font-medium transition-colors" href="#">
+<span class="material-icons-round text-lg mr-3">grid_view</span>
+                    Views
+                </a>
+<a class="text-text-secondary hover:bg-gray-100 hover:text-text-primary flex items-center px-2 py-1.5 rounded text-sm font-medium transition-colors" href="#">
+<span class="material-icons-round text-lg mr-3">map</span>
+                    Roadmap
+                </a>
+</div>
+<!-- Teams / Projects -->
+<div class="mt-6">
+<div class="flex items-center justify-between px-2 mb-2">
+<span class="text-xs font-semibold text-text-secondary uppercase tracking-wider">Your Teams</span>
+<span class="material-icons-round text-text-secondary text-sm cursor-pointer hover:text-primary">add</span>
+</div>
+<div class="space-y-0.5">
+<a class="text-text-secondary hover:bg-gray-100 hover:text-text-primary flex items-center px-2 py-1.5 rounded text-sm transition-colors group" href="#">
+<span class="w-1.5 h-1.5 rounded-full bg-purple-500 mr-3"></span>
+                        Design System
+                    </a>
+<a class="text-text-secondary hover:bg-gray-100 hover:text-text-primary flex items-center px-2 py-1.5 rounded text-sm transition-colors group" href="#">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-3"></span>
+                        Core Product
+                    </a>
+<a class="text-text-secondary hover:bg-gray-100 hover:text-text-primary flex items-center px-2 py-1.5 rounded text-sm transition-colors group" href="#">
+<span class="w-1.5 h-1.5 rounded-full bg-blue-500 mr-3"></span>
+                        Mobile App
+                    </a>
+</div>
+</div>
+<!-- Favorites -->
+<div class="mt-6">
+<div class="flex items-center justify-between px-2 mb-2">
+<span class="text-xs font-semibold text-text-secondary uppercase tracking-wider">Favorites</span>
+</div>
+<div class="space-y-0.5">
+<a class="text-text-secondary hover:bg-gray-100 hover:text-text-primary flex items-center px-2 py-1.5 rounded text-sm transition-colors" href="#">
+<span class="material-icons-round text-lg mr-3 text-gray-400">bookmark_border</span>
+                        Q3 Goals
+                    </a>
+</div>
+</div>
+</div>
+<!-- User Profile -->
+<div class="p-3 border-t border-border-subtle">
+<div class="flex items-center gap-3 p-2 rounded hover:bg-gray-100 cursor-pointer transition-colors">
+<img alt="User Avatar" class="w-8 h-8 rounded-full object-cover" data-alt="Portrait of a user" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB3XGQg-FU1Pem8W228CtMeyXR2SF-l3zNaKglPzasbBYJqITi38u7v_yj6cPbn2Us7gwSN2RfLrDg_wBHtDkgK59Tl0u-WWZI_mqwnWmI2ocni7jm8qLdASYh8ExT9c-GuEZSFbVFfYljGmC-5GvLz0yGBCQcDjYNbr_8Nw0zI9crt7k1mUB_x811ZrUJeprU_VtuCJH4rAj0fsgGPE59DL_SgWbkmwNAjkSWn7MVytLJB3x3iYPQLrPv9RogI1xLHnUyePFDXo5I2"/>
+<div class="flex-1 min-w-0">
+<p class="text-sm font-medium text-text-primary truncate">Alex Morgan</p>
+<p class="text-xs text-text-secondary truncate">alex@acme.inc</p>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 flex flex-col h-full overflow-hidden bg-white dark:bg-gray-900">
+<!-- Top Bar -->
+<header class="h-14 border-b border-border-subtle flex items-center justify-between px-6 bg-white dark:bg-gray-900 sticky top-0 z-10">
+<div class="flex items-center gap-4">
+<h1 class="text-base font-semibold text-text-primary">Inbox</h1>
+<div class="h-4 w-px bg-gray-300"></div>
+<div class="flex gap-1 bg-gray-100 p-0.5 rounded-lg">
+<button class="px-3 py-1 text-sm font-medium bg-white shadow-sm rounded text-text-primary">Unread</button>
+<button class="px-3 py-1 text-sm font-medium text-text-secondary hover:text-text-primary hover:bg-gray-200/50 rounded transition-colors">All</button>
+<button class="px-3 py-1 text-sm font-medium text-text-secondary hover:text-text-primary hover:bg-gray-200/50 rounded transition-colors">Snoozed</button>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<button class="p-1.5 text-text-secondary hover:text-text-primary rounded hover:bg-gray-100 transition-colors tooltip-target" title="Filter settings">
+<span class="material-icons-round text-[20px]">filter_list</span>
+</button>
+<button class="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-text-secondary hover:text-text-primary hover:bg-gray-100 rounded transition-colors border border-transparent hover:border-gray-200">
+<span class="material-icons-round text-[18px]">done_all</span>
+                    Mark all as read
+                </button>
+</div>
+</header>
+<!-- Notifications List -->
+<div class="flex-1 overflow-y-auto">
+<div class="max-w-4xl mx-auto py-6 px-4">
+<!-- Section: Today -->
+<div class="mb-8">
+<h3 class="text-xs font-semibold text-text-secondary mb-3 px-2">Today</h3>
+<div class="bg-white rounded-xl border border-border-subtle shadow-soft divide-y divide-border-subtle">
+<!-- Notification Item (Unread, Mention) -->
+<div class="group notification-row relative flex items-start gap-4 p-4 hover:bg-gray-50 transition-colors cursor-pointer bg-primary-light/10">
+<!-- Unread Indicator -->
+<div class="absolute left-0 top-0 bottom-0 w-[3px] bg-primary rounded-l-xl"></div>
+<div class="mt-0.5 flex-shrink-0 relative">
+<img alt="Sarah Profile" class="w-8 h-8 rounded-full object-cover" data-alt="Portrait of Sarah" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCGmXLyKucRT9hnrig_30eYmZreHDUtsIaiH7cHxDoAYN9ouzRTPmiSwm6c-qGexRnLlqb-qxv0gvBeC_Xw0rYL-lJtUo97OuSGG08C5gY0JVj1pZqi3rWUfzp7EjpM_U2NVSQJze8Y6Aa1pIPVdCqxkL9By6M6BsBwi7I1_MtLiKunvNpxzo7EBOOwXDgCHwN0e-3ZrI-2rwhkugQMR-aN52WWSDySji2pDM3lo3Dlq45TmD84iTKTE1iT23fyY3KNYpXIEzKAARP7"/>
+<div class="absolute -bottom-1 -right-1 bg-white p-[1px] rounded-full">
+<span class="material-icons-round text-xs bg-blue-100 text-blue-600 rounded-full p-0.5">alternate_email</span>
+</div>
+</div>
+<div class="flex-1 min-w-0 pr-16">
+<div class="flex items-baseline gap-2 mb-0.5">
+<span class="text-sm font-semibold text-text-primary">Sarah Jenkins</span>
+<span class="text-xs text-text-secondary">mentioned you in</span>
+<span class="text-xs font-mono font-medium text-text-secondary bg-gray-100 px-1.5 py-0.5 rounded">CORE-129</span>
+</div>
+<p class="text-sm text-text-primary leading-relaxed font-medium">
+                                    Hey <span class="text-primary">@Alex</span>, can you review the new component structure before we merge? It looks a bit complex.
+                                </p>
+<div class="mt-2 flex gap-2">
+<button class="text-xs font-medium text-text-secondary border border-border-subtle px-2 py-1 rounded bg-white hover:bg-gray-50 transition-colors">Reply</button>
+</div>
+</div>
+<div class="text-xs text-text-secondary whitespace-nowrap pt-0.5">10m ago</div>
+<!-- Hover Actions -->
+<div class="row-actions absolute right-4 top-4 flex gap-1 opacity-0 transition-opacity bg-white/80 backdrop-blur-sm shadow-sm rounded-lg border border-gray-200">
+<button class="p-1.5 text-text-secondary hover:text-primary hover:bg-gray-50 rounded" title="Mark as read">
+<span class="material-icons-round text-[18px]">check_circle</span>
+</button>
+<button class="p-1.5 text-text-secondary hover:text-orange-500 hover:bg-gray-50 rounded" title="Snooze">
+<span class="material-icons-round text-[18px]">snooze</span>
+</button>
+<button class="p-1.5 text-text-secondary hover:text-red-500 hover:bg-gray-50 rounded" title="Archive">
+<span class="material-icons-round text-[18px]">archive</span>
+</button>
+</div>
+</div>
+<!-- Notification Item (Unread, Status Change) -->
+<div class="group notification-row relative flex items-start gap-4 p-4 hover:bg-gray-50 transition-colors cursor-pointer bg-primary-light/10">
+<!-- Unread Indicator -->
+<div class="absolute left-0 top-0 bottom-0 w-[3px] bg-primary rounded-l-xl"></div>
+<div class="mt-0.5 flex-shrink-0 relative w-8 h-8 flex items-center justify-center bg-gray-100 rounded-full">
+<span class="material-icons-round text-gray-500 text-sm">sync</span>
+<div class="absolute -bottom-1 -right-1 bg-white p-[1px] rounded-full">
+<span class="material-icons-round text-xs bg-purple-100 text-purple-600 rounded-full p-0.5">priority_high</span>
+</div>
+</div>
+<div class="flex-1 min-w-0 pr-16">
+<div class="flex items-baseline gap-2 mb-0.5">
+<span class="text-sm font-semibold text-text-primary">Design System</span>
+<span class="text-xs text-text-secondary">bot updated</span>
+<span class="text-xs font-mono font-medium text-text-secondary bg-gray-100 px-1.5 py-0.5 rounded">DS-4402</span>
+</div>
+<p class="text-sm text-text-primary font-medium">
+                                    Status changed to <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 text-xs font-medium border border-amber-100"><span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>In Progress</span>
+</p>
+</div>
+<div class="text-xs text-text-secondary whitespace-nowrap pt-0.5">2h ago</div>
+<div class="row-actions absolute right-4 top-4 flex gap-1 opacity-0 transition-opacity bg-white/80 backdrop-blur-sm shadow-sm rounded-lg border border-gray-200">
+<button class="p-1.5 text-text-secondary hover:text-primary hover:bg-gray-50 rounded">
+<span class="material-icons-round text-[18px]">check_circle</span>
+</button>
+<button class="p-1.5 text-text-secondary hover:text-orange-500 hover:bg-gray-50 rounded">
+<span class="material-icons-round text-[18px]">snooze</span>
+</button>
+<button class="p-1.5 text-text-secondary hover:text-red-500 hover:bg-gray-50 rounded">
+<span class="material-icons-round text-[18px]">archive</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Section: Yesterday -->
+<div class="mb-8">
+<h3 class="text-xs font-semibold text-text-secondary mb-3 px-2">Yesterday</h3>
+<div class="bg-white rounded-xl border border-border-subtle shadow-soft divide-y divide-border-subtle">
+<!-- Notification Item (Read, Comment) -->
+<div class="group notification-row relative flex items-start gap-4 p-4 hover:bg-gray-50 transition-colors cursor-pointer">
+<div class="mt-0.5 flex-shrink-0 relative">
+<img alt="Mike Profile" class="w-8 h-8 rounded-full object-cover grayscale opacity-80" data-alt="Portrait of Mike" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAPMpUYXl6gaUN1ITcmFp2bcACSujFkMyB3rplcpoY-XK8EtEn4csSnqv_MyfPYvi66tRNbWYM4DZXXEYR2MYp5-mnCk575V1M351tG6r0ar_sfHaMTp3LGNZCaE7TVFCzYkE5lLBZFnk4out2_D2xYZtO-rLU8O2n_BBqyJP-yQbCXtU_HCw-VUOkt3UJNpDGk5uvVAnSOG1_fQvgxWFcjU9548I0a6d5SVi9cbUN2T6uQ5hJPre3Tm2S0lBZT9A4Tuv6TRRpmB5hT"/>
+</div>
+<div class="flex-1 min-w-0 pr-16">
+<div class="flex items-baseline gap-2 mb-0.5">
+<span class="text-sm font-medium text-text-primary">Mike Chen</span>
+<span class="text-xs text-text-secondary">commented on</span>
+<span class="text-xs font-mono text-text-secondary bg-gray-50 px-1.5 py-0.5 rounded border border-gray-100">MOB-88</span>
+</div>
+<p class="text-sm text-text-secondary">
+                                    I've updated the API endpoint documentation. Let me know if you need anything else.
+                                </p>
+</div>
+<div class="text-xs text-text-secondary whitespace-nowrap pt-0.5">Yesterday</div>
+<div class="row-actions absolute right-4 top-4 flex gap-1 opacity-0 transition-opacity bg-white/80 backdrop-blur-sm shadow-sm rounded-lg border border-gray-200">
+<button class="p-1.5 text-text-secondary hover:text-primary hover:bg-gray-50 rounded">
+<span class="material-icons-round text-[18px]">check_circle</span>
+</button>
+<button class="p-1.5 text-text-secondary hover:text-orange-500 hover:bg-gray-50 rounded">
+<span class="material-icons-round text-[18px]">snooze</span>
+</button>
+<button class="p-1.5 text-text-secondary hover:text-red-500 hover:bg-gray-50 rounded">
+<span class="material-icons-round text-[18px]">archive</span>
+</button>
+</div>
+</div>
+<!-- Notification Item (Read, Assigned) -->
+<div class="group notification-row relative flex items-start gap-4 p-4 hover:bg-gray-50 transition-colors cursor-pointer">
+<div class="mt-0.5 flex-shrink-0 relative w-8 h-8 flex items-center justify-center bg-gray-50 border border-gray-100 rounded-full">
+<span class="material-icons-round text-gray-400 text-sm">person_add</span>
+</div>
+<div class="flex-1 min-w-0 pr-16">
+<div class="flex items-baseline gap-2 mb-0.5">
+<span class="text-sm font-medium text-text-primary">David Kim</span>
+<span class="text-xs text-text-secondary">assigned to you</span>
+<span class="text-xs font-mono text-text-secondary bg-gray-50 px-1.5 py-0.5 rounded border border-gray-100">CORE-140</span>
+</div>
+<p class="text-sm text-text-primary">
+                                    Fix intermittent crash on dashboard load
+                                </p>
+</div>
+<div class="text-xs text-text-secondary whitespace-nowrap pt-0.5">Yesterday</div>
+<div class="row-actions absolute right-4 top-4 flex gap-1 opacity-0 transition-opacity bg-white/80 backdrop-blur-sm shadow-sm rounded-lg border border-gray-200">
+<button class="p-1.5 text-text-secondary hover:text-primary hover:bg-gray-50 rounded">
+<span class="material-icons-round text-[18px]">check_circle</span>
+</button>
+<button class="p-1.5 text-text-secondary hover:text-orange-500 hover:bg-gray-50 rounded">
+<span class="material-icons-round text-[18px]">snooze</span>
+</button>
+<button class="p-1.5 text-text-secondary hover:text-red-500 hover:bg-gray-50 rounded">
+<span class="material-icons-round text-[18px]">archive</span>
+</button>
+</div>
+</div>
+<!-- Notification Item (Read, Project Update) -->
+<div class="group notification-row relative flex items-start gap-4 p-4 hover:bg-gray-50 transition-colors cursor-pointer">
+<div class="mt-0.5 flex-shrink-0 relative w-8 h-8 flex items-center justify-center bg-emerald-50 rounded-full">
+<span class="material-icons-round text-emerald-500 text-sm">rocket_launch</span>
+</div>
+<div class="flex-1 min-w-0 pr-16">
+<div class="flex items-baseline gap-2 mb-0.5">
+<span class="text-sm font-medium text-text-primary">Core Product</span>
+<span class="text-xs text-text-secondary">project update</span>
+</div>
+<p class="text-sm text-text-secondary">
+                                    Sprint 42 Completed. 12 issues resolved, 0 remaining.
+                                </p>
+</div>
+<div class="text-xs text-text-secondary whitespace-nowrap pt-0.5">Yesterday</div>
+<div class="row-actions absolute right-4 top-4 flex gap-1 opacity-0 transition-opacity bg-white/80 backdrop-blur-sm shadow-sm rounded-lg border border-gray-200">
+<button class="p-1.5 text-text-secondary hover:text-primary hover:bg-gray-50 rounded">
+<span class="material-icons-round text-[18px]">check_circle</span>
+</button>
+<button class="p-1.5 text-text-secondary hover:text-orange-500 hover:bg-gray-50 rounded">
+<span class="material-icons-round text-[18px]">snooze</span>
+</button>
+<button class="p-1.5 text-text-secondary hover:text-red-500 hover:bg-gray-50 rounded">
+<span class="material-icons-round text-[18px]">archive</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Empty State Suggestion (Hidden by default, shown if needed) -->
+<!-- <div class="flex flex-col items-center justify-center py-20 text-center opacity-60">
+                    <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                        <span class="material-icons-round text-3xl text-gray-400">inbox</span>
+                    </div>
+                    <h3 class="text-lg font-medium text-text-primary">Inbox Zero</h3>
+                    <p class="text-sm text-text-secondary mt-1">You're all caught up! Enjoy your day.</p>
+                 </div> -->
+<div class="flex justify-center mt-8 pb-8 text-xs text-text-secondary">
+<p>Press <kbd class="bg-gray-100 border border-gray-300 rounded px-1 py-0.5 font-mono text-[10px] mx-1">E</kbd> to archive, <kbd class="bg-gray-100 border border-gray-300 rounded px-1 py-0.5 font-mono text-[10px] mx-1">H</kbd> to snooze</p>
+</div>
+</div>
+</div>
+</main>
+</body></html>

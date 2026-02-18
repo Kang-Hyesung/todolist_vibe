@@ -33,4 +33,9 @@ web-dev.log
 Thumbs.db
 
 # Local agent state
-.sisyphus/
+# Keep portable markdown context for cross-machine continuation.
+.sisyphus/*
+!.sisyphus/drafts/
+!.sisyphus/drafts/*.md
+!.sisyphus/plans/
+!.sisyphus/plans/*.md

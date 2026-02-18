@@ -1,39 +1,39 @@
 # todolist_vibe
 
-Lightweight team project management board.
+가벼운 팀 프로젝트 관리 보드입니다.
 
-## Stack
+## 기술 스택
 
-- Frontend: React + Vite (`apps/web`)
+- 프론트엔드: React + Vite (`apps/web`)
 - API: ASP.NET Core 8 (`apps/api`)
-- Database: PostgreSQL (Docker Compose)
+- 데이터베이스: PostgreSQL (Docker Compose)
 
-## Repository Structure
+## 저장소 구조
 
 ```text
 apps/
-  web/   # frontend
-  api/   # backend
+  web/     # 프론트엔드
+  api/     # 백엔드
 infra/
-  docker/ # compose
-docs/     # feature/ui/checklist specs
-scripts/  # dev command entrypoint
+  docker/  # 도커 컴포즈
+docs/      # 기능/UI/체크리스트 명세
+scripts/   # 개발 명령 진입점
 ```
 
-## Quick Start
+## 빠른 시작
 
-1. Install Node.js and Docker Desktop.
-2. Run from repository root:
+1. Node.js와 Docker Desktop을 설치합니다.
+2. 저장소 루트에서 아래 명령을 실행합니다.
 
 ```powershell
 .\scripts\dev.cmd docker-up
 ```
 
-3. Open:
-- Web: `http://127.0.0.1:5173`
-- API health: `http://localhost:8080/health`
+3. 아래 주소로 접속합니다.
+- 웹: `http://127.0.0.1:5173`
+- API 헬스체크: `http://localhost:8080/health`
 
-## Common Commands
+## 자주 쓰는 명령어
 
 ```powershell
 .\scripts\dev.cmd docker-up
@@ -43,7 +43,7 @@ scripts/  # dev command entrypoint
 .\scripts\dev.cmd smoke
 ```
 
-## Specs
+## 명세 문서
 
 - `docs/FEATURE_SPEC.md`
 - `docs/UI_SPEC.md`

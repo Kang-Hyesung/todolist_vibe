@@ -326,8 +326,11 @@ public class IssuesController(AppDbContext dbContext) : ControllerBase
 
     private static string BuildIssueKey(Project project, int sequence)
     {
-        var compact = Regex.Replace(project.Name.ToUpperInvariant(), "[^A-Z0-9]", string.Empty);
-        var prefix = compact.Length >= 4 ? compact[..4] : compact.PadRight(4, 'X');
+        var requestedPrefix = project.KeyPrefix.Trim().ToUpperInvariant();
+        var normalizedPrefix = Regex.Replace(requestedPrefix, "[^A-Z]", string.Empty);
+        var prefix = normalizedPrefix.Length >= 2
+            ? normalizedPrefix[..Math.Min(6, normalizedPrefix.Length)]
+            : "PRJ";
         return $"{prefix}-{sequence:000}";
     }
 

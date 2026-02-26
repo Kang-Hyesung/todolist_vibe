@@ -5,17 +5,52 @@ namespace Vibe.Api.Data;
 
 public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
 {
+    public DbSet<Workspace> Workspaces => Set<Workspace>();
     public DbSet<Project> Projects => Set<Project>();
     public DbSet<Issue> Issues => Set<Issue>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<Workspace>(entity =>
+        {
+            entity.ToTable("workspaces");
+            entity.HasKey(workspace => workspace.Id);
+            entity.Property(workspace => workspace.Name).HasMaxLength(120).IsRequired();
+            entity.Property(workspace => workspace.Slug).HasMaxLength(120).IsRequired();
+            entity.Property(workspace => workspace.Plan).HasMaxLength(32).IsRequired();
+            entity.Property(workspace => workspace.Status).HasMaxLength(32).IsRequired();
+            entity.Property(workspace => workspace.MemberCount).IsRequired();
+            entity.Property(workspace => workspace.Lead).HasMaxLength(120);
+            entity.Property(workspace => workspace.Summary).HasMaxLength(400).IsRequired();
+            entity.Property(workspace => workspace.Description).HasMaxLength(4000).IsRequired();
+            entity.Property(workspace => workspace.CreatedAt).IsRequired();
+            entity.Property(workspace => workspace.UpdatedAt).IsRequired();
+        });
+
         modelBuilder.Entity<Project>(entity =>
         {
             entity.ToTable("projects");
             entity.HasKey(project => project.Id);
+            entity.Property(project => project.WorkspaceId).IsRequired();
             entity.Property(project => project.Name).HasMaxLength(120).IsRequired();
             entity.Property(project => project.Type).HasMaxLength(32).IsRequired();
+            entity.Property(project => project.KeyPrefix).HasMaxLength(6).IsRequired();
+            entity.Property(project => project.Status).HasMaxLength(32).IsRequired();
+            entity.Property(project => project.Priority).HasMaxLength(32).IsRequired();
+            entity.Property(project => project.Lead).HasMaxLength(120);
+            entity.Property(project => project.Summary).HasMaxLength(400).IsRequired();
+            entity.Property(project => project.Description).HasMaxLength(4000).IsRequired();
+            entity.Property(project => project.Label).HasMaxLength(60);
+            entity.Property(project => project.CreatedAt).IsRequired();
+            entity.Property(project => project.UpdatedAt).IsRequired();
+
+            entity.HasOne(project => project.Workspace)
+                .WithMany(workspace => workspace.Projects)
+                .HasForeignKey(project => project.WorkspaceId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasIndex(project => project.WorkspaceId);
+            entity.HasIndex(project => new { project.WorkspaceId, project.UpdatedAt });
         });
 
         modelBuilder.Entity<Issue>(entity =>

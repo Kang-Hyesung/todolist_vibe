@@ -18,6 +18,17 @@ import {
   SelectValue,
 } from "./components/ui/select";
 import { mockProjects, mockWorkspaces } from "./data/mock";
+import { apiEnabled } from "./lib/api";
+import {
+  createProjectInApi,
+  createWorkspaceInApi,
+  deleteProjectInApi,
+  deleteWorkspaceInApi,
+  fetchProjectsFromApi,
+  fetchWorkspacesFromApi,
+  updateProjectInApi,
+  updateWorkspaceInApi,
+} from "./lib/management-api";
 import { cn } from "./lib/utils";
 import type { Project, Workspace } from "./types/domain";
 
@@ -115,6 +126,11 @@ function pseudoGuid(seed: string) {
   return `${clean.slice(0, 8)}-${clean.slice(8, 12)}-${clean.slice(12, 16)}-${clean.slice(16, 20)}-${clean.slice(20, 32)}`;
 }
 
+function notifyApiError(message: string, error: unknown) {
+  console.error(message, error);
+  window.alert(message);
+}
+
 function App() {
   const urlContext = readContextFromUrl(window.location.search);
   const storageContext = readContextFromStorage();
@@ -158,6 +174,38 @@ function App() {
     root.classList.toggle("dark", theme === "dark");
     window.localStorage.setItem("vibe-theme", theme);
   }, [theme]);
+
+  useEffect(() => {
+    if (!apiEnabled) {
+      return;
+    }
+
+    let disposed = false;
+
+    const syncCatalogs = async () => {
+      try {
+        const [apiWorkspaces, apiProjects] = await Promise.all([
+          fetchWorkspacesFromApi(),
+          fetchProjectsFromApi(),
+        ]);
+        if (disposed) {
+          return;
+        }
+        setWorkspaces(apiWorkspaces);
+        setProjects(apiProjects);
+      } catch (error) {
+        if (!disposed) {
+          console.error("Failed to load workspace/project catalogs from API.", error);
+        }
+      }
+    };
+
+    void syncCatalogs();
+
+    return () => {
+      disposed = true;
+    };
+  }, []);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -260,6 +308,18 @@ function App() {
   }, [activeWorkspaceId, activeProjectId]);
 
   const handleCreateWorkspace = useCallback((input: WorkspaceMutationInput) => {
+    if (apiEnabled) {
+      void (async () => {
+        try {
+          const created = await createWorkspaceInApi(input);
+          setWorkspaces((current) => [...current, created]);
+        } catch (error) {
+          notifyApiError("워크스페이스 생성에 실패했습니다.", error);
+        }
+      })();
+      return;
+    }
+
     setWorkspaces((current) => {
       const existingSlugs = new Set(current.map((workspace) => workspace.slug));
       const baseSlug = slugify(input.name) || "workspace";
@@ -286,6 +346,20 @@ function App() {
   }, []);
 
   const handleUpdateWorkspace = useCallback((workspaceId: string, input: WorkspaceMutationInput) => {
+    if (apiEnabled) {
+      void (async () => {
+        try {
+          const updated = await updateWorkspaceInApi(workspaceId, input);
+          setWorkspaces((current) =>
+            current.map((workspace) => (workspace.id === workspaceId ? updated : workspace)),
+          );
+        } catch (error) {
+          notifyApiError("워크스페이스 수정에 실패했습니다.", error);
+        }
+      })();
+      return;
+    }
+
     setWorkspaces((current) => {
       const existingSlugs = new Set(
         current.filter((workspace) => workspace.id !== workspaceId).map((workspace) => workspace.slug),
@@ -314,10 +388,35 @@ function App() {
   }, []);
 
   const handleDeleteWorkspace = useCallback((workspaceId: string) => {
+    if (apiEnabled) {
+      void (async () => {
+        try {
+          await deleteWorkspaceInApi(workspaceId);
+          setWorkspaces((current) => current.filter((workspace) => workspace.id !== workspaceId));
+          setProjects((current) => current.filter((project) => project.workspaceId !== workspaceId));
+        } catch (error) {
+          notifyApiError("워크스페이스 삭제에 실패했습니다. 연결된 프로젝트를 먼저 정리하세요.", error);
+        }
+      })();
+      return;
+    }
+
     setWorkspaces((current) => current.filter((workspace) => workspace.id !== workspaceId));
   }, []);
 
   const handleCreateProject = useCallback((input: ProjectMutationInput) => {
+    if (apiEnabled) {
+      void (async () => {
+        try {
+          const created = await createProjectInApi(input);
+          setProjects((current) => [...current, created]);
+        } catch (error) {
+          notifyApiError("프로젝트 생성에 실패했습니다.", error);
+        }
+      })();
+      return;
+    }
+
     setProjects((current) => {
       const now = new Date().toISOString();
       const projectSeed = `${input.name}-${Date.now()}`;
@@ -350,6 +449,20 @@ function App() {
   }, []);
 
   const handleUpdateProject = useCallback((projectId: string, input: ProjectMutationInput) => {
+    if (apiEnabled) {
+      void (async () => {
+        try {
+          const updated = await updateProjectInApi(projectId, input);
+          setProjects((current) =>
+            current.map((project) => (project.id === projectId ? updated : project)),
+          );
+        } catch (error) {
+          notifyApiError("프로젝트 수정에 실패했습니다.", error);
+        }
+      })();
+      return;
+    }
+
     setProjects((current) =>
       current.map((project) => {
         if (project.id !== projectId) {
@@ -365,6 +478,18 @@ function App() {
   }, []);
 
   const handleDeleteProject = useCallback((projectId: string) => {
+    if (apiEnabled) {
+      void (async () => {
+        try {
+          await deleteProjectInApi(projectId);
+          setProjects((current) => current.filter((project) => project.id !== projectId));
+        } catch (error) {
+          notifyApiError("프로젝트 삭제에 실패했습니다.", error);
+        }
+      })();
+      return;
+    }
+
     setProjects((current) => current.filter((project) => project.id !== projectId));
   }, []);
 

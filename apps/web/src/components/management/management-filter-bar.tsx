@@ -36,7 +36,7 @@ export function ManagementFilterBar({
 
   return (
     <div className="border-b border-border-subtle p-4 dark:border-border-subtle">
-      <div className={cn("grid gap-2", rightControl ? "sm:grid-cols-[minmax(0,1fr)_220px]" : undefined)}>
+      <div className="grid gap-2">
         <div className="relative">
           <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-soft" />
           <Input
@@ -47,7 +47,7 @@ export function ManagementFilterBar({
             aria-label={queryPlaceholder}
           />
         </div>
-        {rightControl ? <div>{rightControl}</div> : null}
+        {rightControl ? <div className="min-w-0">{rightControl}</div> : null}
       </div>
 
       <div className="mt-2 flex flex-wrap items-center justify-between gap-2">

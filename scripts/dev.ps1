@@ -3,6 +3,12 @@ param(
   [Parameter(Position = 0)]
   [string]$Command = "help",
 
+  [ValidateSet("auto", "docker", "podman")]
+  [string]$Engine = "auto",
+
+  [ValidateRange(1, 65535)]
+  [int]$ApiPort = 8080,
+
   [Parameter(ValueFromRemainingArguments = $true)]
   [string[]]$Args
 )
@@ -16,6 +22,9 @@ $ComposeFile = Join-Path $RepoRoot "infra\docker\docker-compose.yml"
 $WebDevPort = 5173
 $WebDevPidFile = Join-Path $RepoRoot ".web-dev.pid"
 $WebDevLogFile = Join-Path $RepoRoot "web-dev.log"
+$ApiBaseUrl = "http://localhost:$ApiPort"
+$ResolvedContainerEngine = $null
+$ResolvedComposeCommandPrefix = $null
 
 function Run-InDir {
   param(
@@ -32,11 +41,167 @@ function Run-InDir {
   }
 }
 
+function Test-CommandAvailable {
+  param([Parameter(Mandatory = $true)][string]$Name)
+  return $null -ne (Get-Command -Name $Name -ErrorAction SilentlyContinue)
+}
+
+function Get-PythonUserScriptsPaths {
+  $paths = New-Object System.Collections.Generic.List[string]
+
+  if (-not (Test-CommandAvailable -Name "py")) {
+    return @()
+  }
+
+  try {
+    $userBase = (& py -m site --user-base 2>$null | Select-Object -First 1).Trim()
+    if ($userBase) {
+      $scriptsPath = Join-Path $userBase "Scripts"
+      if (Test-Path $scriptsPath) {
+        $paths.Add($scriptsPath)
+      }
+    }
+  }
+  catch {}
+
+  $appDataPythonRoot = Join-Path $env:APPDATA "Python"
+  if (Test-Path $appDataPythonRoot) {
+    $versionedPythonDirs = Get-ChildItem -Path $appDataPythonRoot -Directory -Filter "Python*" -ErrorAction SilentlyContinue
+    foreach ($dir in $versionedPythonDirs) {
+      $versionedScriptsPath = Join-Path $dir.FullName "Scripts"
+      if (Test-Path $versionedScriptsPath) {
+        $paths.Add($versionedScriptsPath)
+      }
+    }
+  }
+
+  return ($paths.ToArray() | Select-Object -Unique)
+}
+
+function Resolve-CommandPath {
+  param([Parameter(Mandatory = $true)][string]$Name)
+
+  $resolvedName = [string]$Name
+  $command = Get-Command -Name $resolvedName -ErrorAction SilentlyContinue
+  if ($command) {
+    return [string]($command | Select-Object -First 1 -ExpandProperty Source)
+  }
+
+  $pythonScriptsPaths = @(Get-PythonUserScriptsPaths)
+  foreach ($pythonScriptsPath in $pythonScriptsPaths) {
+    $pythonScriptsPathText = [string]$pythonScriptsPath
+    if (-not $pythonScriptsPathText) {
+      continue
+    }
+
+    $candidates = @(
+      (Join-Path -Path $pythonScriptsPathText -ChildPath $resolvedName),
+      (Join-Path -Path $pythonScriptsPathText -ChildPath "$resolvedName.exe"),
+      (Join-Path -Path $pythonScriptsPathText -ChildPath "$resolvedName.cmd"),
+      (Join-Path -Path $pythonScriptsPathText -ChildPath "$resolvedName.bat")
+    )
+
+    foreach ($candidate in $candidates) {
+      if (Test-Path $candidate) {
+        return $candidate
+      }
+    }
+  }
+
+  return $null
+}
+
+function Resolve-ContainerEngine {
+  if ($script:ResolvedContainerEngine) {
+    return $script:ResolvedContainerEngine
+  }
+
+  $requestedEngine = $Engine.ToLowerInvariant()
+  if ($requestedEngine -eq "auto") {
+    if (Test-CommandAvailable -Name "docker") {
+      $requestedEngine = "docker"
+    }
+    elseif (Test-CommandAvailable -Name "podman") {
+      $requestedEngine = "podman"
+    }
+    else {
+      throw "Neither 'docker' nor 'podman' command is available in PATH."
+    }
+  }
+
+  if (-not (Test-CommandAvailable -Name $requestedEngine)) {
+    throw "Container engine '$requestedEngine' is not available in PATH."
+  }
+
+  $script:ResolvedContainerEngine = $requestedEngine
+  return $script:ResolvedContainerEngine
+}
+
+function Resolve-ComposeCommandPrefix {
+  if ($script:ResolvedComposeCommandPrefix) {
+    return $script:ResolvedComposeCommandPrefix
+  }
+
+  $selectedEngine = Resolve-ContainerEngine
+  if ($selectedEngine -eq "docker") {
+    $script:ResolvedComposeCommandPrefix = @("docker", "compose")
+    return $script:ResolvedComposeCommandPrefix
+  }
+
+  $composeProviderAvailable = $false
+  try {
+    & podman compose version *> $null
+    $composeProviderAvailable = ($LASTEXITCODE -eq 0)
+  }
+  catch {
+    $composeProviderAvailable = $false
+  }
+
+  if ($composeProviderAvailable) {
+    $script:ResolvedComposeCommandPrefix = @("podman", "compose")
+    return $script:ResolvedComposeCommandPrefix
+  }
+
+  $podmanComposePath = Resolve-CommandPath -Name "podman-compose"
+  if ($podmanComposePath) {
+    $script:ResolvedComposeCommandPrefix = @($podmanComposePath)
+    return $script:ResolvedComposeCommandPrefix
+  }
+
+  throw "Podman compose is unavailable. Install the podman compose plugin or podman-compose."
+}
+
+function Run-ContainerEngineCommand {
+  param(
+    [Parameter(Mandatory = $true)][string[]]$EngineArgs,
+    [switch]$Quiet
+  )
+
+  $selectedEngine = Resolve-ContainerEngine
+  if ($Quiet) {
+    & $selectedEngine @EngineArgs | Out-Null
+  }
+  else {
+    & $selectedEngine @EngineArgs
+  }
+
+  if ($LASTEXITCODE -ne 0) {
+    throw "$selectedEngine command failed with exit code $LASTEXITCODE."
+  }
+}
+
 function Run-Compose {
   param([Parameter(Mandatory = $true)][string[]]$ComposeArgs)
-  & docker compose -f $ComposeFile @ComposeArgs
+  $composePrefix = @(Resolve-ComposeCommandPrefix)
+  $env:VIBE_API_PORT = "$ApiPort"
+  if ($composePrefix.Count -eq 2) {
+    & $composePrefix[0] $composePrefix[1] -f $ComposeFile @ComposeArgs
+  }
+  else {
+    & $composePrefix[0] -f $ComposeFile @ComposeArgs
+  }
   if ($LASTEXITCODE -ne 0) {
-    throw "docker compose command failed with exit code $LASTEXITCODE."
+    throw "compose command failed with exit code $LASTEXITCODE."
   }
 }
 
@@ -147,7 +312,7 @@ function Stop-WebDevServer {
 function Run-Smoke {
   Write-Host "Running smoke checks..."
 
-  $apiResult = Invoke-RestMethod -Uri "http://localhost:8080/health" -Method Get -ErrorAction Stop
+  $apiResult = Invoke-RestMethod -Uri "$ApiBaseUrl/health" -Method Get -ErrorAction Stop
   if (-not $apiResult -or $apiResult.status -ne "ok") {
     throw "API health check failed. Expected status=ok."
   }
@@ -164,10 +329,10 @@ function Run-Smoke {
 function Show-Help {
   Write-Host ""
   Write-Host "Usage:"
-  Write-Host "  .\scripts\dev.ps1 <command> [args]"
-  Write-Host "  .\scripts\dev.cmd <command> [args]"
+  Write-Host "  .\scripts\dev.ps1 <command> [args] [-Engine auto|docker|podman] [-ApiPort <port>]"
+  Write-Host "  .\scripts\dev.cmd <command> [args] [-Engine auto|docker|podman] [-ApiPort <port>]"
   Write-Host ""
-  Write-Host "Docker (project compose):"
+  Write-Host "Container compose (project):"
   Write-Host "  docker-up             Build/start postgres+api and start web dev server"
   Write-Host "  docker-down           Stop/remove compose containers and stop web dev server"
   Write-Host "  docker-start          Start existing compose containers"
@@ -176,7 +341,15 @@ function Show-Help {
   Write-Host "  docker-ps             Show compose container status"
   Write-Host "  docker-logs [svc]     Show logs (follows). svc optional: api/postgres"
   Write-Host ""
-  Write-Host "Docker (machine-wide containers):"
+  Write-Host "Container engine options:"
+  Write-Host "  -Engine auto          Use docker if found, otherwise podman"
+  Write-Host "  -Engine docker        Force docker for this run"
+  Write-Host "  -Engine podman        Force podman for this run"
+  Write-Host "  -ApiPort <port>       Host port mapped to API container 8080 (default: 8080)"
+  Write-Host "  engine                Show currently selected engine"
+  Write-Host "  container-*           Alias for docker-* (e.g., container-up)"
+  Write-Host ""
+  Write-Host "Container engine (machine-wide containers):"
   Write-Host "  docker-start-all      Start all existing containers on your machine"
   Write-Host "  docker-stop-all       Stop all running containers on your machine"
   Write-Host ""
@@ -188,15 +361,26 @@ function Show-Help {
   Write-Host "  web-preview           npm run preview"
   Write-Host ""
   Write-Host "Utility:"
-  Write-Host "  api-health            GET http://localhost:8080/health"
+  Write-Host "  api-health            GET $ApiBaseUrl/health"
   Write-Host "  smoke                 Verify API health + web HTTP status"
   Write-Host "  help                  Show this help"
   Write-Host ""
 }
 
-switch ($Command.ToLowerInvariant()) {
+$normalizedCommand = $Command.ToLowerInvariant()
+if ($normalizedCommand.StartsWith("container-")) {
+  $normalizedCommand = "docker-" + $normalizedCommand.Substring("container-".Length)
+}
+
+switch ($normalizedCommand) {
   "help" {
     Show-Help
+    break
+  }
+
+  "engine" {
+    $selectedEngine = Resolve-ContainerEngine
+    Write-Host "Selected container engine: $selectedEngine"
     break
   }
 
@@ -243,26 +427,34 @@ switch ($Command.ToLowerInvariant()) {
   }
 
   "docker-start-all" {
-    $all = docker ps -aq
+    $selectedEngine = Resolve-ContainerEngine
+    $all = & $selectedEngine ps -aq
+    if ($LASTEXITCODE -ne 0) {
+      throw "$selectedEngine command failed with exit code $LASTEXITCODE."
+    }
     if (-not $all) {
       Write-Host "No containers found."
       break
     }
     foreach ($containerId in $all) {
-      docker start $containerId | Out-Null
+      Run-ContainerEngineCommand -EngineArgs @("start", $containerId) -Quiet
       Write-Host "Started: $containerId"
     }
     break
   }
 
   "docker-stop-all" {
-    $running = docker ps -q
+    $selectedEngine = Resolve-ContainerEngine
+    $running = & $selectedEngine ps -q
+    if ($LASTEXITCODE -ne 0) {
+      throw "$selectedEngine command failed with exit code $LASTEXITCODE."
+    }
     if (-not $running) {
       Write-Host "No running containers found."
       break
     }
     foreach ($containerId in $running) {
-      docker stop $containerId | Out-Null
+      Run-ContainerEngineCommand -EngineArgs @("stop", $containerId) -Quiet
       Write-Host "Stopped: $containerId"
     }
     break
@@ -294,7 +486,7 @@ switch ($Command.ToLowerInvariant()) {
   }
 
   "api-health" {
-    Invoke-RestMethod -Uri "http://localhost:8080/health" -Method Get | ConvertTo-Json -Depth 5
+    Invoke-RestMethod -Uri "$ApiBaseUrl/health" -Method Get | ConvertTo-Json -Depth 5
     break
   }
 
